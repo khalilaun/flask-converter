@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image Converter</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 400px;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .drop-zone {
+      border: 2px dashed #4CAF50;
+      border-radius: 10px;
+      padding: 30px;
+      cursor: pointer;
+      color: #666;
+      transition: background 0.2s, border-color 0.2s;
+      margin-bottom: 15px;
+      min-height: 120px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .drop-zone.dragover {
+      background: #e8f5e9;
+      border-color: #388e3c;
+      color: #333;
+    }
+    .format-bubbles {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 15px 0;
+      gap: 10px;
+    }
+    .format-bubbles button {
+      padding: 10px 15px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      background: #fafafa;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .format-bubbles button.selected {
+      background: #4CAF50;
+      color: white;
+      border-color: #388e3c;
+    }
+    button.convert-btn {
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+      border-radius: 6px;
+      border: none;
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button.convert-btn:hover {
+      background: #45a049;
+    }
+    #file-input {
+      display: none;
+    }
+    .preview-img {
+      max-width: 100%;
+      max-height: 150px;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Image Converter</h2>
+    <form id="converter-form" method="POST" enctype="multipart/form-data">
+      <div class="drop-zone" id="drop-zone">
+        Drag & drop an image here<br>or click to select
+      </div>
+      <input type="file" id="file-input" name="file" accept="image/*" required>
+
+      <div class="format-bubbles" id="format-bubbles">
+        <button type="button" data-format="JPEG">JPEG</button>
+        <button type="button" data-format="PNG">PNG</button>
+        <button type="button" data-format="BMP">BMP</button>
+        <button type="button" data-format="GIF">GIF</button>
+        <button type="button" data-format="TIFF">TIFF</button>
+        <button type="button" data-format="WEBP">WEBP</button>
+      </div>
+
+      <input type="hidden" name="format" id="selected-format" required>
+      <button type="submit" class="convert-btn">Convert</button>
+    </form>
+  </div>
+
+  <script>
+    const dropZone = document.getElementById("drop-zone");
+    const fileInput = document.getElementById("file-input");
+    const hiddenInput = document.getElementById("selected-format");
+    const bubbles = document.querySelectorAll(".format-bubbles button");
+
+    // Drag & drop handlers
+    dropZone.addEventListener("click", () => fileInput.click());
+
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+
+    dropZone.addEventListener("dragleave", () => {
+      dropZone.classList.remove("dragover");
+    });
+
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        showPreview(fileInput.files[0]);
+      }
+    });
+
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files.length) {
+        showPreview(fileInput.files[0]);
+      }
+    });
+
+    // Bubble selection
+    bubbles.forEach(button => {
+      button.addEventListener("click", () => {
+        bubbles.forEach(b => b.classList.remove("selected"));
+        button.classList.add("selected");
+        hiddenInput.value = button.dataset.format;
+      });
+    });
+
+    // Function to display image preview
+    function showPreview(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        dropZone.innerHTML = `<img src="${e.target.result}" alt="Preview" class="preview-img">`;
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
